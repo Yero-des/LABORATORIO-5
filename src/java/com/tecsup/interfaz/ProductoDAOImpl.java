@@ -15,7 +15,7 @@ public class ProductoDAOImpl implements ProductoDAO {
     @Override
     public List<Producto> listar() {
         List<Producto> lista = new ArrayList<>();
-        String sql = "SELECT codigo, nombre, precio, stock FROM producto";
+        String sql = "SELECT * FROM producto";
         try {
             Statement stmt = con.createStatement();
             ResultSet rs = stmt.executeQuery(sql);
@@ -33,6 +33,43 @@ public class ProductoDAOImpl implements ProductoDAO {
             e.printStackTrace();
         }
         return lista;
+    }
+
+    @Override
+    public void agregar(Producto producto) throws SQLException {
+        String sql = "INSERT INTO producto (codigo, nombre, precio, stock) VALUES (?, ?, ?, ?)";
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setInt(1, producto.getCodigo());
+            ps.setString(2, producto.getNombre());
+            ps.setDouble(3, producto.getPrecio());
+            ps.setInt(4, producto.getStock());
+            ps.executeUpdate();
+        } catch (SQLException e) {
+            // Manejar la excepción
+        }
+    }
+
+    @Override
+    public List<Producto> buscarPorNombre(String nombre) throws SQLException {
+        String sql = "SELECT * FROM producto WHERE nombre LIKE ?";
+        List<Producto> productos = new ArrayList<>();
+        try (PreparedStatement ps = con.prepareStatement(sql)) {
+            ps.setString(1, "%" + nombre + "%");
+            try (ResultSet rs = ps.executeQuery()) {
+                while (rs.next()) {
+                    Producto producto = new Producto(
+                            rs.getInt("codigo"),
+                            rs.getString("nombre"),
+                            rs.getDouble("precio"),
+                            rs.getInt("stock")
+                    );
+                    productos.add(producto);
+                }
+            }
+        } catch (SQLException ex) {
+            // Manejar la excepcion
+        }
+        return productos;
     }
 
 }

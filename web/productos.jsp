@@ -5,6 +5,7 @@
 --%>
 
 <%@page contentType="text/html" pageEncoding="UTF-8"%>
+<%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <!DOCTYPE html>
 <html>
     <head>
@@ -23,8 +24,8 @@
                 </div>
 
                 <div class="col-auto">
-                    <form class="d-flex">
-                        <input class="form-control me-2" type="search" placeholder="Buscar por nombre" aria-label="Buscar">
+                    <form class="d-flex" action="Dashboard">
+                        <input class="form-control me-2" name="nombre" type="search" placeholder="Buscar por nombre" aria-label="Buscar">
                         <button class="btn btn-danger" type="submit">Buscar</button>
                     </form>
                 </div>
@@ -33,7 +34,7 @@
         </header>
 
         <main class="container">
-            <form>
+            <form id="formClean" method="POST" action="Dashboard">
                 <div class="row mt-5 justify-content-center p-0">
                     <div class="col-6">
                         <div class="mb-3 d-flex justify-content-between">
@@ -56,7 +57,20 @@
                 </div>
                 <div class="row mt-2 justify-content-center">
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-success" style="width: 20rem;">Agregar</button>
+                        <button type="submit" class="btn btn-success" style="width: 10rem;">Insertar</button>
+                    </div>
+                    <div class="col-auto">
+                        <button id="btn-clean" type="button" class="btn btn-secondary" style="width: 10rem;">Limpiar</button>
+                    </div>
+                </div>
+                <div class="row mt-2 justify-content-center">
+                    <div class="col-auto">
+                        <c:if test="${not empty mensaje}">
+                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                                ${mensaje}
+                                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                            </div>
+                        </c:if>
                     </div>
                 </div>
             </form>
@@ -72,20 +86,25 @@
                             </tr>
                         </thead>
                         <tbody>
-                        <c:forEach items="${lista}" var="producto">
-                            <tr>
-                                <td>${producto.codigo}</td>
-                                <td>${producto.nombre}</td>
-                                <td>${producto.precio}</td>
-                                <td>${producto.stock}</td>
-                            </tr>
-                        </c:forEach>
+                            <c:forEach items="${lista}" var="producto">
+                                <tr>
+                                    <td>${producto.codigo}</td>
+                                    <td>${producto.nombre}</td>
+                                    <td>${producto.precio}</td>
+                                    <td>${producto.stock}</td>
+                                </tr>
+                            </c:forEach>
                         </tbody>
                     </table>
                 </div>
             </div>
         </main>
-
-
+        <script>
+            const btnClean = document.getElementById('btn-clean');
+            btnClean.addEventListener('click', function () {
+                const myForm = document.getElementById('formClean');
+                myForm.reset();
+            });
+        </script>
     </body>
 </html>

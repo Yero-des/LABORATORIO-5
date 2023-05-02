@@ -17,6 +17,8 @@ import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import java.sql.*;
 import java.util.List;
+import java.util.logging.Level;
+import java.util.logging.Logger;
 
 /**
  *
@@ -27,34 +29,32 @@ public class DashboardServlet extends HttpServlet {
     protected void processRequest(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
         response.setContentType("text/html;charset=UTF-8");
-        try (PrintWriter out = response.getWriter()) {
-            /* TODO output your page here. You may use following sample code. */
-            out.println("<!DOCTYPE html>");
-            out.println("<html>");
-            out.println("<head>");
-            out.println("<title>Servlet DashboardServlet</title>");
-            out.println("</head>");
-            out.println("<body>");
-            out.println("<h1>Servlet DashboardServlet at " + request.getContextPath() + "</h1>");
-            out.println("</body>");
-            out.println("</html>");
-        }
+
     }
 
     @Override
     protected void doGet(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
 
+        String nombreBuscado = request.getParameter("nombre");
+        List<Producto> lista = null;
+
         try {
             DatabaseConection db = new DatabaseConection();
             Connection con = db.Conectar();
             ProductoDAO productoDAO = new ProductoDAOImpl(con);
-            List<Producto> lista = productoDAO.listar();
-            System.out.println(lista);
+
+            if (nombreBuscado != null && !nombreBuscado.isEmpty()) {
+                lista = productoDAO.buscarPorNombre(nombreBuscado);
+            } else {
+                lista = productoDAO.listar();
+            }
+
             request.setAttribute("lista", lista);
             RequestDispatcher rd = request.getRequestDispatcher("productos.jsp");
             rd.forward(request, response);
             con.close();
+
         } catch (Exception e) {
             e.printStackTrace();
         }
@@ -64,14 +64,31 @@ public class DashboardServlet extends HttpServlet {
     @Override
     protected void doPost(HttpServletRequest request, HttpServletResponse response)
             throws ServletException, IOException {
-        processRequest(request, response);
+
+        int codigo = Integer.parseInt(request.getParameter("codigo"));
+        String nombre = request.getParameter("nombre");
+        double precio = Double.parseDouble(request.getParameter("precio"));
+        int stock = Integer.parseInt(request.getParameter("stock"));
+
+        Producto producto = new Producto(codigo, nombre, precio, stock);
+
+        try {
+            DatabaseConection db = new DatabaseConection();
+            Connection con = db.Conectar();
+            ProductoDAO productoDAO = new ProductoDAOImpl(con);
+            productoDAO.agregar(producto);
+
+            String mensaje = "El producto se ha añadido correctamente";
+            request.setAttribute("mensaje", mensaje);
+            response.sendRedirect(request.getContextPath() + "/Dashboard");
+            con.close();
+
+        } catch (SQLException ex) {
+            Logger.getLogger(DashboardServlet.class.getName()).log(Level.SEVERE, null, ex);
+        }
+
     }
 
-    /**
-     * Returns a short description of the servlet.
-     *
-     * @return a String containing servlet description
-     */
     @Override
     public String getServletInfo() {
         return "Short description";
