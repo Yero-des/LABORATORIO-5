@@ -9,6 +9,8 @@ public interface ProductoDAO {
 
     public void agregar(Producto producto) throws SQLException;
 
+    public void agregarNoSql(Producto producto) throws SQLException;
+
     public List<Producto> buscarPorNombre(String nombre) throws SQLException;
 
 }

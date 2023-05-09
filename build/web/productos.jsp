@@ -57,7 +57,10 @@
                 </div>
                 <div class="row mt-2 justify-content-center">
                     <div class="col-auto">
-                        <button type="submit" class="btn btn-success" style="width: 10rem;">Insertar</button>
+                        <button type="submit" class="btn btn-success" name="btnInsertar" style="width: 10rem;">Insertar</button>
+                    </div>
+                    <div class="col-auto">
+                        <button type="submit" class="btn btn-danger" name="btnInsertarNosql" style="width: 10rem;">Insertar noSql</button>
                     </div>
                     <div class="col-auto">
                         <button id="btn-clean" type="button" class="btn btn-secondary" style="width: 10rem;">Limpiar</button>

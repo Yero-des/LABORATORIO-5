@@ -10,7 +10,6 @@ import com.tecsup.interfaz.ProductoDAO;
 import com.tecsup.interfaz.ProductoDAOImpl;
 import jakarta.servlet.RequestDispatcher;
 import java.io.IOException;
-import java.io.PrintWriter;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServlet;
 import jakarta.servlet.http.HttpServletRequest;
@@ -76,10 +75,19 @@ public class DashboardServlet extends HttpServlet {
             DatabaseConection db = new DatabaseConection();
             Connection con = db.Conectar();
             ProductoDAO productoDAO = new ProductoDAOImpl(con);
-            productoDAO.agregar(producto);
 
-            String mensaje = "El producto se ha añadido correctamente";
-            request.setAttribute("mensaje", mensaje);
+            if (request.getParameter("btnInsertar") != null) {
+
+                // Insertar en SQL
+                productoDAO.agregar(producto);
+
+            } else {
+
+                // Insertar en NoSQL
+                productoDAO.agregarNoSql(producto);
+
+            }
+
             response.sendRedirect(request.getContextPath() + "/Dashboard");
             con.close();
 

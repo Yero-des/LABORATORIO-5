@@ -1,8 +1,14 @@
 package com.tecsup.interfaz;
 
+import com.mongodb.client.FindIterable;
+import com.mongodb.client.MongoCollection;
+import com.mongodb.client.MongoDatabase;
+import com.tecsup.connection.MongoConection;
+import com.mongodb.client.model.Filters;
 import java.sql.*;
 import java.util.ArrayList;
 import java.util.List;
+import org.bson.Document;
 
 public class ProductoDAOImpl implements ProductoDAO {
 
@@ -15,6 +21,8 @@ public class ProductoDAOImpl implements ProductoDAO {
     @Override
     public List<Producto> listar() {
         List<Producto> lista = new ArrayList<>();
+
+        // Conexion MySql
         String sql = "SELECT * FROM producto";
         try {
             Statement stmt = con.createStatement();
@@ -32,6 +40,20 @@ public class ProductoDAOImpl implements ProductoDAO {
         } catch (SQLException e) {
             e.printStackTrace();
         }
+
+        // Conexion MongoDb
+        MongoConection conexion = new MongoConection();
+        MongoDatabase baseDatos = conexion.getDatabase();
+        MongoCollection<Document> coleccion = baseDatos.getCollection("producto");
+        FindIterable<Document> iterable = coleccion.find();
+        for (Document doc : iterable) {
+            int codigo = doc.getInteger("codigo");
+            String nombre = doc.getString("nombre");
+            double precio = doc.getDouble("precio");
+            int stock = doc.getInteger("stock");
+            Producto p = new Producto(codigo, nombre, precio, stock);
+            lista.add(p);
+        }
         return lista;
     }
 
@@ -47,6 +69,18 @@ public class ProductoDAOImpl implements ProductoDAO {
         } catch (SQLException e) {
             // Manejar la excepción
         }
+    }
+
+    @Override
+    public void agregarNoSql(Producto producto) throws SQLException {
+        MongoConection conexion = new MongoConection();
+        MongoDatabase baseDatos = conexion.getDatabase();
+        MongoCollection<Document> coleccion = baseDatos.getCollection("producto");
+        Document doc = new Document("codigo", producto.getCodigo())
+                .append("nombre", producto.getNombre())
+                .append("precio", producto.getPrecio())
+                .append("stock", producto.getStock());
+        coleccion.insertOne(doc);
     }
 
     @Override
@@ -69,6 +103,20 @@ public class ProductoDAOImpl implements ProductoDAO {
         } catch (SQLException ex) {
             // Manejar la excepcion
         }
+
+        MongoConection conexion = new MongoConection();
+        MongoDatabase baseDatos = conexion.getDatabase();
+        MongoCollection<Document> coleccion = baseDatos.getCollection("producto");
+        FindIterable<Document> iterable = coleccion.find(Filters.regex("nombre", ".*" + nombre + ".*"));
+        for (Document doc : iterable) {
+            Producto p = new Producto(
+                    doc.getInteger("codigo"),
+                    doc.getString("nombre"),
+                    doc.getDouble("precio"),
+                    doc.getInteger("stock"));
+            productos.add(p);
+        }
+
         return productos;
     }
 
